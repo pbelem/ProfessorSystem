@@ -1,6 +1,7 @@
 package com.belem.controller;
 
 import com.belem.dto.ProfessorDTO;
+import com.belem.model.entities.enums.EntityStatus;
 import com.belem.model.service.ProfessorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,4 +29,35 @@ public class ProfessorController {
         return ResponseEntity.ok(professors);
     }
 
+    @GetMapping("/by-status")
+    public ResponseEntity<List<ProfessorDTO>> getProfessorsByStatus(@RequestParam EntityStatus status) {
+        List<ProfessorDTO> professors = professorService.getProfessorsByStatus(status);
+        return ResponseEntity.ok(professors);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProfessorDTO> getProfessorById(@PathVariable Long id) {
+        ProfessorDTO professor = professorService.getProfessorById(id);
+        return ResponseEntity.ok(professor);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProfessorDTO> updateProfessor(@PathVariable Long id, @RequestBody ProfessorDTO dto) {
+        ProfessorDTO updatedProfessor = professorService.updateProfessor(id, dto);
+        return ResponseEntity.ok(updatedProfessor);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ProfessorDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestParam EntityStatus status) {
+        ProfessorDTO updatedProfessor = professorService.updateStatus(id, status);
+        return ResponseEntity.ok(updatedProfessor);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProfessor(@PathVariable Long id) {
+        professorService.deleteProfessor(id);
+        return ResponseEntity.noContent().build();
+    }
 }

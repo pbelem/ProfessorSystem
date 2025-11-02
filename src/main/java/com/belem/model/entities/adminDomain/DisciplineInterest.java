@@ -6,10 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Tabela associativa: (Professor N-N Disciplina)
- * Indica o interesse (com prioridade) do professor em uma disciplina por semestre.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

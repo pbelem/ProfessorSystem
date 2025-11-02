@@ -2,6 +2,7 @@ package com.belem.model.repository;
 
 import com.belem.model.entities.user.Professor;
 import com.belem.model.entities.enums.EntityStatus;
+import com.belem.model.entities.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,6 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     List<Professor> findByStatus(EntityStatus status);
 
     Optional<Professor> findByRegistrationNumber(String registrationNumber);
+
+    Optional<Professor> findByUserAccount(User userAccount);
 }

@@ -1,12 +1,15 @@
 package com.belem.model.service;
 
 import com.belem.dto.JwtTokenResponse;
+import com.belem.exceptions.ResourceNotFoundException;
 import com.belem.model.entities.user.LoginRequest;
+import com.belem.model.entities.user.User;
 import com.belem.model.repository.UserRepository;
 import com.belem.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,19 +21,19 @@ public class AuthService {
     private final JwtService jwtService;
 
     public JwtTokenResponse login(LoginRequest request) {
-        // Autentica o usuário (Spring Security)
-        authenticationManager.authenticate(
+
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
 
-        // Se autenticado, busca o usuário e gera o token
-        var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found after authentication"));
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", authentication.getName()));
 
         String token = jwtService.generateToken(user);
+
         return new JwtTokenResponse(token);
     }
 }

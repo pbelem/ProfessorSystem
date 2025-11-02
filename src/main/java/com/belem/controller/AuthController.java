@@ -1,5 +1,6 @@
 package com.belem.controller;
 
+import com.belem.dto.JwtTokenResponse;
 import com.belem.model.entities.user.LoginRequest;
 import com.belem.model.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-//        String token = authService.login(loginRequest);
-//        return ResponseEntity.ok(new JwtTokenResponse(token));
-
-        return ResponseEntity.ok("Login endpoint reached. Token should be generated here.");
+    public ResponseEntity<JwtTokenResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        JwtTokenResponse tokenResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(tokenResponse);
     }
 }

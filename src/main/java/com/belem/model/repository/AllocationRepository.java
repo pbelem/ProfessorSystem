@@ -5,9 +5,13 @@ import com.belem.model.entities.adminDomain.Discipline;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface AllocationRepository extends JpaRepository<Allocation, Long> {
 
     //Regra de Negócio 2.1 (max 5)
     long countByDisciplineAndSemester(Discipline discipline, String semester);
+
+    List<Allocation> findBySemester(String semester);
 }

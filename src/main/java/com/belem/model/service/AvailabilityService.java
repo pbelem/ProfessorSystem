@@ -1,7 +1,9 @@
 package com.belem.model.service;
 
 import com.belem.dto.DisciplineInterestRequestDTO;
+import com.belem.dto.InterestItemDTO;
 import com.belem.dto.ScheduleAvailabilityRequestDTO;
+import com.belem.exceptions.ResourceNotFoundException;
 import com.belem.model.entities.adminDomain.Discipline;
 import com.belem.model.entities.adminDomain.DisciplineInterest;
 import com.belem.model.entities.adminDomain.ScheduleAvailability;
@@ -19,28 +21,28 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AvailabilityService {
 
     private final ScheduleAvailabilityRepository scheduleRepository;
     private final DisciplineInterestRepository interestRepository;
+
     private final ProfessorRepository professorRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final DisciplineRepository disciplineRepository;
     private final UserRepository userRepository;
 
-    // (Req 3: Professor informa horários disponíveis)
-    @Transactional
     public void saveScheduleAvailability(ScheduleAvailabilityRequestDTO request) {
         Professor professor = getAuthenticatedProfessor();
         String semester = request.getSemester();
 
-        // 1. Limpa a disponibilidade antiga para este semestre
         scheduleRepository.deleteByProfessorAndSemester(professor, semester);
 
-        // 2. Busca os TimeSlots válidos
         List<TimeSlot> timeSlots = timeSlotRepository.findAllById(request.getTimeSlotIds());
+        if (timeSlots.size() != request.getTimeSlotIds().size()) {
+            throw new RuntimeException("One or more TimeSlot IDs are invalid.");
+        }
 
-        // 3. Salva os novos
         timeSlots.forEach(slot -> {
             ScheduleAvailability availability = new ScheduleAvailability();
             availability.setProfessor(professor);
@@ -50,19 +52,19 @@ public class AvailabilityService {
         });
     }
 
-    // (Req 4: Professor informa disciplinas de interesse)
-    @Transactional
     public void saveDisciplineInterests(DisciplineInterestRequestDTO request) {
         Professor professor = getAuthenticatedProfessor();
         String semester = request.getSemester();
 
-        // (Lógica similar: limpar interesses antigos do semestre)
-        // ...
+        interestRepository.deleteByProfessorAndSemester(professor, semester);
 
-        // Salva os novos interesses
-        request.getInterests().forEach(item -> {
+        for (InterestItemDTO item : request.getInterests()) {
             Discipline discipline = disciplineRepository.findById(item.getDisciplineId())
-                    .orElseThrow(() -> new RuntimeException("Discipline not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Discipline", "id", item.getDisciplineId()));
+
+            if (item.getPriority() != 1 && item.getPriority() != 2) {
+                throw new RuntimeException("Invalid priority value: " + item.getPriority() + ". Must be 1 or 2.");
+            }
 
             DisciplineInterest interest = new DisciplineInterest();
             interest.setProfessor(professor);
@@ -70,19 +72,41 @@ public class AvailabilityService {
             interest.setSemester(semester);
             interest.setPriority(item.getPriority());
             interestRepository.save(interest);
-        });
+        }
     }
 
-    // Método auxiliar para buscar o Professor logado
+
+    @Transactional(readOnly = true)
+    public List<ScheduleAvailability> getMySchedule(String semester) {
+        Professor professor = getAuthenticatedProfessor();
+        return scheduleRepository.findByProfessorAndSemester(professor, semester);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DisciplineInterest> getMyInterests(String semester) {
+        Professor professor = getAuthenticatedProfessor();
+        return interestRepository.findByProfessorAndSemester(professor, semester);
+    }
+
+    // ========================================================================
+    // MÉTODO AUXILIAR DE SEGURANÇA
+    // ========================================================================
+    /**
+     * Busca o 'Professor' (entidade de negócio) com base no 'User'
+     * (entidade de segurança) que está atualmente logado.
+     */
     private Professor getAuthenticatedProfessor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No authenticated user found.");
+        }
+
         String username = authentication.getName();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
-        // (Assume que User.professorProfile está mapeado)
-        return professorRepository.findById(user.getProfessorProfile().getId())
-                .orElseThrow(() -> new RuntimeException("Professor profile not found for user"));
+        return professorRepository.findByUserAccount(user)
+                .orElseThrow(() -> new RuntimeException("Authenticated user is not a Professor."));
     }
 }

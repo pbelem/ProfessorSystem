@@ -38,7 +38,7 @@ public class TimeSlot {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EntityStatus status; // Pode ser modificado (1.3.1)
+    private EntityStatus status;
 
     @OneToMany(mappedBy = "timeSlot")
     private List<ScheduleAvailability> availabilities;

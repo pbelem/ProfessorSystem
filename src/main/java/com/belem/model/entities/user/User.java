@@ -34,7 +34,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private UserRole role;
 
-    // Relacionamento opcional se o Professor for o "dono" do User
     @OneToOne(mappedBy = "userAccount")
     private Professor professorProfile;
 

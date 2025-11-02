@@ -17,30 +17,47 @@ public class DisciplineController {
 
     private final DisciplineService disciplineService;
 
-    /**
-     * Endpoint para ADMIN: Cadastrar nova disciplina.
-     */
     @PostMapping
     public ResponseEntity<DisciplineDTO> createDiscipline(@RequestBody DisciplineDTO dto) {
-        return new ResponseEntity<>(disciplineService.createDiscipline(dto), HttpStatus.CREATED);
+        DisciplineDTO createdDto = disciplineService.createDiscipline(dto);
+        return new ResponseEntity<>(createdDto, HttpStatus.CREATED);
     }
 
-    /**
-     * Endpoint para PROFESSOR e ADMIN: Listar disciplinas ativas (Req 2).
-     */
+    @GetMapping
+    public ResponseEntity<List<DisciplineDTO>> getAllDisciplines() {
+        List<DisciplineDTO> disciplines = disciplineService.getAllDisciplines();
+        return ResponseEntity.ok(disciplines);
+    }
+
     @GetMapping("/active")
     public ResponseEntity<List<DisciplineDTO>> getActiveDisciplines() {
-        return ResponseEntity.ok(disciplineService.getAllActiveDisciplines());
+        List<DisciplineDTO> disciplines = disciplineService.getAllActiveDisciplines();
+        return ResponseEntity.ok(disciplines);
     }
 
-    /**
-     * Endpoint para ADMIN: Inativar disciplina (Req 1.4.2).
-     */
+    @GetMapping("/{id}")
+    public ResponseEntity<DisciplineDTO> getDisciplineById(@PathVariable Long id) {
+        DisciplineDTO discipline = disciplineService.getDisciplineById(id);
+        return ResponseEntity.ok(discipline);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DisciplineDTO> updateDiscipline(@PathVariable Long id, @RequestBody DisciplineDTO dto) {
+        DisciplineDTO updatedDto = disciplineService.updateDiscipline(id, dto);
+        return ResponseEntity.ok(updatedDto);
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<DisciplineDTO> updateStatus(
             @PathVariable Long id,
-            @RequestParam EntityStatus status
-    ) {
-        return ResponseEntity.ok(disciplineService.updateStatus(id, status));
+            @RequestParam EntityStatus status) {
+        DisciplineDTO updatedDto = disciplineService.updateStatus(id, status);
+        return ResponseEntity.ok(updatedDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDiscipline(@PathVariable Long id) {
+        disciplineService.deleteDiscipline(id);
+        return ResponseEntity.noContent().build();
     }
 }

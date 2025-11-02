@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor // Injeta o 'final'
+@RequiredArgsConstructor
 @Transactional
 public class DisciplineService {
 

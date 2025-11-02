@@ -6,10 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Tabela associativa: (Professor N-N HorarioAula)
- * Indica que um Professor ESTÁ disponível em um certo Horário em um Semestre.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -6,10 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Representa a alocação final (feita pelo Admin).
- * Cada registro é efetivamente uma "Turma" (Req 2.2).
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
